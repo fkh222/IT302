@@ -1,7 +1,7 @@
 /*
 Fariha Khan
-9/30/25
-Unit 4 Express.js Exercise
+10/13/25
+Unit 6 Express.js Part 2 Exercise
 IT302-451
 fk222@njit.edu
 */
@@ -136,6 +136,63 @@ app.get('/films_genre_fk222', async (req, res) => {
         res.status(500).json({ error: 'Error fetching filtered titles from the database' });
     }
 });
+
+app.use(express.json())
+app.post('/films_fk222', async (req, res) => {
+    try {
+        // Step 1: Initialize a variable for the MongoClient using the connectToMongo function
+        const db = await connectToMongo();
+
+        // Step 2: initialize 4 (or more) variables to extract the title, year, genre and actors from the req.body JSON (the request body)
+        const movieDoc = {
+            title: req.body.title,
+            year: req.body.year,
+            genre: req.body.genre,
+            actors: req.body.actors
+        }
+
+        // Step 3: Call the "insertOne" function with these parameters to the films collection
+        const movieResponse = await db.collection('films_fk222').insertOne(movieDoc);
+
+        // Step 4: If the "acknowledged" field from the results is true, respond with status 201 and an appropriate "message" field and value, otherwise status 500 with an appropriate "error" field and value
+        if (movieResponse.acknowledged) {
+            res.status(201).json({ message: 'Film created successfully.' });
+        }
+    }
+    catch (e) {
+        // Step 5: Remember to include a try-catch block inside the entire function that returns a status 500 with an appropriate "error" field and value
+        console.error('Error posting film:', e);
+        res.status(500).json({ error: e.message })
+    }
+
+});
+
+app.delete('/films_fk222', async (req, res) => {
+    try {
+        // Step 1: Initialize a variable for the MongoClient using the connectToMongo function
+        const db = await connectToMongo();
+        // Step 2: extract the film title from the req.body JSON (the request body)
+        const deleteDoc = {
+            title: req.body.title
+        }
+        // Step 3: Call the "deleteOne" function with these parameters to the films collection
+        const deleteResponse = await db.collection('films_fk222').deleteOne(deleteDoc);
+        // Step 4: If the "deletedCount" field from the results is 1, respond with status 200 and an appropriate "message" field and value, otherwise status 500 with an appropriate "error" field and value
+        if (deleteResponse.deletedCount == 1) {
+            res.status(200).json({ message: "Film deleted successfully." });
+        }
+        else {
+            res.status(500).json({ error: 'Error deleting film.'});
+        }
+    }
+    catch (e) {
+        // Step 5: Remember to include a try-catch block inside the entire function that returns a status 500 with an appropriate "error" field
+        console.error('Error deleting film:', e);
+        res.status(500).json({ error: e.message })
+    }
+
+});
+
 
 // Start the server
 
